@@ -1,5 +1,6 @@
 
-/* expecting rankno, noofprocessors, filename containing hostname,port
+/* expecting cmd arguments
+  rankno, noofprocessors, filename containing hostname,port
 
 format in file
 hostname1 my_server_port1
@@ -166,51 +167,54 @@ int MPI_Recv( void *buf, int count, int datatype, int source,
 
 }
 
-int MPI_Finalize( void ){
-
-
+int MPI_Barrier( int comm ){
 	int dest;
-	if(rank==comm_size-1){
-		dest=0;
-	}else{
-		dest=rank+1;
-	}
-	int source;
-	if(rank==0){
-		source=comm_size-1;
-	}else{
-		source=rank-1;
-	}
-	if(rank==0){
-		int tag=1;
-		int Stat;
-		char inmsg[6];
-		MPI_Send("READY", 6, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-		MPI_Recv(inmsg, 6, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
-		printf(" %s %d \n",inmsg,rank);
-		MPI_Send("DONE", 5, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-	}else if(rank==comm_size-1){
-		int tag=1;
-		int Stat;
-		char inmsg[6];
-		MPI_Recv(inmsg, 6, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
-		printf(" %s %d \n",inmsg,rank);
-		MPI_Send("READY", 6, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-		MPI_Recv(inmsg, 5, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
-		printf(" %s %d \n",inmsg,rank);
-	}else{
-		int tag=1;
-		int Stat;
-		char inmsg[6];
-		MPI_Recv(inmsg, 6, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
-		MPI_Send("READY", 6, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-		printf(" %s %d \n",inmsg,rank);
-		MPI_Recv(inmsg, 5, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
-		MPI_Send("DONE", 5, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-		printf(" %s %d \n",inmsg,rank);
+		if(rank==comm_size-1){
+			dest=0;
+		}else{
+			dest=rank+1;
+		}
+		int source;
+		if(rank==0){
+			source=comm_size-1;
+		}else{
+			source=rank-1;
+		}
+		if(rank==0){
+			int tag=1;
+			MPI_Status Stat;
+			char inmsg[6];
+			MPI_Send("READY", 6, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
+			MPI_Recv(inmsg, 6, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
+			printf(" %s %d \n",inmsg,rank);
+			MPI_Send("DONE", 5, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
+		}else if(rank==comm_size-1){
+			int tag=1;
+			MPI_Status Stat;
+			char inmsg[6];
+			MPI_Recv(inmsg, 6, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
+			printf(" %s %d \n",inmsg,rank);
+			MPI_Send("READY", 6, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
+			MPI_Recv(inmsg, 5, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
+			printf(" %s %d \n",inmsg,rank);
+		}else{
+			int tag=1;
+			MPI_Status Stat;
+			char inmsg[6];
+			MPI_Recv(inmsg, 6, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
+			MPI_Send("READY", 6, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
+			printf(" %s %d \n",inmsg,rank);
+			MPI_Recv(inmsg, 5, MPI_CHAR, source, tag, MPI_COMM_WORLD, &Stat);
+			MPI_Send("DONE", 5, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
+			printf(" %s %d \n",inmsg,rank);
 
-	}
-    return MPI_SUCCESS;
+		}
+	    return MPI_SUCCESS;
+}
+
+int MPI_Finalize( void ){
+return MPI_Barrier(MPI_COMM_WORLD);
+
 }
 
 

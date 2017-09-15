@@ -14,6 +14,8 @@ int MPI_Comm_rank ( int comm, int *rank_ptr );
 int MPI_Send( void *buf, int count, int datatype, int dest,
                      int tag, int comm );
 int MPI_Recv( void *buf, int count, int datatype, int source,
-                     int tag, int comm, int *status );
+                     int tag, int comm, MPI_Status *status );
 
 int MPI_Finalize( void );
+
+int MPI_Barrier( int comm );
